@@ -13,10 +13,10 @@ const PlayerHandCard = ({card, index, trick, setTrick, player, players}) => {
     
     const handleClick = (e) =>{
         e.preventDefault();
-        const prevTrick =[...trick];
+        const tempTrick =[...trick];
         const playerIndex = players.findIndex(p => p.id === player.id);
-        prevTrick[playerIndex]= `${e.target.id}`;
-        setTrick(prevTrick);
+        tempTrick[playerIndex]= `${e.target.id}`;
+        setTrick(tempTrick);
     }
 
     return(

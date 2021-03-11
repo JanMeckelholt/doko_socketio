@@ -32,23 +32,45 @@ io.on('connection', (socket)=>{
         //socket.broadcast.to(user.room).emit('message', {user: 'admin', text: `${user.name}, has joined!`});
         io.to(user.room).emit('roomData', {room: user.room, users: getUsersInRoom(user.room)});
         
-        let deck = createDeck();
-        //console.log(deck);
-       // socket.emit('message', {user: 'deck', text: `First Card in Deck: ${deck[0]}`})
-        let hand
-        [hand, deck] = dealToHand(deck, 10, (error)=>{
-            console.log(erorr)
-        });
-       // socket.emit('message', {user: 'deck', text: `First Card in Hand: ${hand[0]}`})
 
-        callback(hand, user); 
+       // socket.emit('message', {user: 'deck', text: `First Card in Hand: ${hand[0]}`})
+        //console.log(user);
+        callback(user); 
     });
 
-    socket.on('sendMessage', (message, callback)=>{
-        const user = getUser(socket.id);
-        io.to(user.room).emit('message', {user: user.name, text: message});
-        callback();
-    })
+    socket.on('dealCards', ({room}, callback)=>{
+        let deck = createDeck();
+        console.log(socket.id);
+        
+        //const user = getUser(socket.id);
+        //console.log(user);
+       // socket.emit('message', {user: 'deck', text: `First Card in Deck: ${deck[0]}`})
+        const players = getUsersInRoom(room); 
+        console.log('players in dealCards');
+        console.log(players);
+        console.log(room);
+        players.forEach(player =>{
+            let hand;
+            [hand, deck] = dealToHand(deck, 10, (error)=>{
+                console.log(erorr)
+            });
+            if (player.id===socket.id){
+                socket.emit('newCards', hand);
+            } else{
+                socket.broadcast.to(player.id).emit('newCards', hand);
+            }
+
+            console.log('newCards')
+            console.log(hand);
+
+        });
+   
+
+        //const user = getUser(socket.id);
+        
+        //io.to(user.room).emit('newCards', {user: user.name, text: message});
+        
+    });
 
     socket.on('disconnect', ()=> {
         console.log('Connection ended!');

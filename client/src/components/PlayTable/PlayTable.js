@@ -7,7 +7,7 @@ const cardFolder= '/cards/'
 
 
 
-const PlayTable = ({trick, players}) => {
+const PlayTable = ({trick, players, dealCards}) => {
     console.log('players');
     console.log(players);
     return (
@@ -29,7 +29,7 @@ const PlayTable = ({trick, players}) => {
             </div>
             <div className="col-s-6 ml-5">
                     <div>
-                        <button className="btn btn-primary m-3">New Game</button>
+                        <button onClick={dealCards} className="btn btn-primary m-3">New Game</button>
                         <button className="btn btn-primary m-3">Leave Table</button>
                     </div>
 

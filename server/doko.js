@@ -49,6 +49,23 @@ const dealToHand = (deck, numberOfCards, callback) => {
     return [hand, deck];
 };
 
+const dealToHands = (deck, cardsPerHand =10, numberOfHands = 4, callback) => {
+    const allottedDeck = [];
+    for(const cardsOnHand=0; cardsOnHand<cardsPerHand; cardsOnHand++) {
+        for (const handIndex=0; handIndex<numberOfHands; handIndex++){
+            const cardIndex = Math.floor(Math.random() * deck.length);
+            if (deck.length===0) {
+                callback({error: 'not enough cards in deck'});
+            } else{
+
+                const card = deck.splice(cardIndex, 1);
+                allottedDeck.push({card: card, hand: handIndex});
+            }
+        }
+    }
+    return allottedDeck;
+};
+
 const sortHand = (hand) =>{
     // console.log('hand: '+hand);
     var len = hand.length;

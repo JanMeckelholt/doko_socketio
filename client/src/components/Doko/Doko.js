@@ -34,10 +34,10 @@ const Doko = ({location}) => {
         console.log(socket);
         console.log('name: ' + name, ', room: ' + room)
 
-        socket.emit('join', {name, room}, (hand, player)=>{
-            setHand(hand);
+        socket.emit('join', {name, room}, (player)=>{
+           // setHand(hand);
             setPlayer(player);
-            console.log('hand'+hand);
+            console.log(player);
         });  
         
         return () => {
@@ -47,16 +47,23 @@ const Doko = ({location}) => {
     }, [SERVERENDPOINT, location.search]);
 
     useEffect(()=>{
-
-            
-
         socket.on('roomData', (data)=>{
             setPlayers(data.users);
-
             console.log(data.users);
-
+        });        
+        socket.on('newCards', (hand)=>{
+            console.log('newCards')
+            setHand(hand);
+            console.log(hand);
         });
     }, []);
+
+    const dealCards = ()=>{
+        console.log('dealCards');
+        socket.emit('dealCards', {room}, ()=>{
+            
+        });
+    };
 
 
 
@@ -64,7 +71,7 @@ const Doko = ({location}) => {
         <div className="outerContainer">
             <div className="containerPlayTable">
                 <Infobar room={room} />
-                <PlayTable trick={trick} players={players}/>
+                <PlayTable trick={trick} players={players} dealCards={dealCards}/>
                
 
             </div>
