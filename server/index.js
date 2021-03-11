@@ -41,7 +41,7 @@ io.on('connection', (socket)=>{
         });
        // socket.emit('message', {user: 'deck', text: `First Card in Hand: ${hand[0]}`})
 
-        callback(hand); 
+        callback(hand, user); 
     });
 
     socket.on('sendMessage', (message, callback)=>{

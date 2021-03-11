@@ -8,7 +8,7 @@ import onlineIcon from '../../icons/onlineIcon.png'
 
 
 
-const Playerhand = ({hand, setTrick}) => (
+const Playerhand = ({hand, trick, setTrick, player, players}) => (
     <div className="playerHand">
         {hand ? (
         <div>
@@ -16,7 +16,7 @@ const Playerhand = ({hand, setTrick}) => (
 
             <div className="activeContainer">
                 {hand.map ((card, index) => (
-                    <PlayerHandCard card={card} index={index} setTrick={setTrick}/>
+                    <PlayerHandCard card={card} index={index} trick={trick} setTrick={setTrick} player={player} players={players}/>
                    // console.log('user in room: ' + user.name)
                 ))}
             </div>

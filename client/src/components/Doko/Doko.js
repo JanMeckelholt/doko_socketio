@@ -18,6 +18,8 @@ const Doko = ({location}) => {
     const SERVERENDPOINT = 'localhost:5000';
     const [name, setName] = useState('');
     const [room, setRoom] = useState('');
+    
+    const [player, setPlayer] = useState('');
 
     const [players, setPlayers] = useState('');
     const [hand, setHand] = useState('');
@@ -32,8 +34,9 @@ const Doko = ({location}) => {
         console.log(socket);
         console.log('name: ' + name, ', room: ' + room)
 
-        socket.emit('join', {name, room}, (hand)=>{
+        socket.emit('join', {name, room}, (hand, player)=>{
             setHand(hand);
+            setPlayer(player);
             console.log('hand'+hand);
         });  
         
@@ -66,7 +69,7 @@ const Doko = ({location}) => {
 
             </div>
             <div className="containerPlayerHand">
-                <PlayerHand hand={hand}  setTrick={setTrick}/>
+                <PlayerHand player={player} players={players} hand={hand} trick={trick}  setTrick={setTrick}/>
             </div>
             <TextContainer players={players}/>
         </div>
