@@ -38,7 +38,6 @@ const Doko = ({location}) => {
         });  
         
         return () => {
-          //  socket.emit('disconnect');
             socket.close();
         }
         
@@ -58,13 +57,6 @@ const Doko = ({location}) => {
 
 
 
-    // const sendMessage = (e) => {
-    //     e.preventDefault();
-    //     if (message){
-    //         socket.emit('sendMessage', message, ()=> setMessage(''));
-    //     }
-    // }
-
     return(
         <div className="outerContainer">
             <div className="containerPlayTable">
@@ -74,7 +66,7 @@ const Doko = ({location}) => {
 
             </div>
             <div className="containerPlayerHand">
-                <PlayerHand hand={hand}/>
+                <PlayerHand hand={hand}  setTrick={setTrick}/>
             </div>
             <TextContainer players={players}/>
         </div>
