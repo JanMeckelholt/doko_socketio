@@ -13,7 +13,7 @@ const TextContainer = ({players}) => (
 
             <div className="activeTextContainer">
                 {players.map ((player) => (
-                    <div key="{user.id" className="activeTextItem">
+                    <div key={player.id} className="activeTextItem">
                         Username: {player.name}
                         <img alt="online" src={onlineIcon}/>
                     </div>

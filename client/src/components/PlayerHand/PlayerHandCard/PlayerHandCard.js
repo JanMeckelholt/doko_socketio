@@ -6,17 +6,15 @@ const cardFolder= '/cards/'
 
 
 
-const PlayerHandCard = ({card, index, trick, setTrick, player, players}) => {
-    const playCard = (card) =>{
-        console.log(card);
-    }
+const PlayerHandCard = ({card, playCard}) => {
     
     const handleClick = (e) =>{
         e.preventDefault();
-        const tempTrick =[...trick];
-        const playerIndex = players.findIndex(p => p.id === player.id);
-        tempTrick[playerIndex]= `${e.target.id}`;
-        setTrick(tempTrick);
+        playCard(`${e.target.id}`);
+        // const tempTrick =[...trick];
+        // const playerIndex = players.findIndex(p => p.id === player.id);
+        // tempTrick[playerIndex]= `${e.target.id}`;
+        // setTrick(tempTrick);
     }
 
     return(

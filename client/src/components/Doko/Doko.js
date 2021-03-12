@@ -20,10 +20,12 @@ const Doko = ({location}) => {
     const [room, setRoom] = useState('');
     
     const [player, setPlayer] = useState('');
+    
 
     const [players, setPlayers] = useState('');
     const [hand, setHand] = useState('');
     const [trick, setTrick] = useState(['back', 'back', 'back', 'back']);
+    const [nextPlayer, setNextPlayer] = useState('');
 
     useEffect(()=>{
         const {name, room} = queryString.parse(location.search);
@@ -47,24 +49,52 @@ const Doko = ({location}) => {
     }, [SERVERENDPOINT, location.search]);
 
     useEffect(()=>{
+        console.log("useEffect: " + players)
         socket.on('roomData', (data)=>{
+            console.log('roomData');
+            console.log(data);
             setPlayers(data.users);
-            console.log(data.users);
         });        
         socket.on('newCards', (hand)=>{
             console.log('newCards')
             setHand(hand);
-            console.log(hand);
+        });        
+        socket.on('nextPlayer', (nextPlayer)=>{
+            setNextPlayer(nextPlayer);
+        });      
+        socket.on('cardPlayed', (data)=>{
+            console.log('card: '+data.card + ' played by: ' + data.player.name)
+            console.log('players');
+            console.log(players);
+            console.log(data.players)
+            const tempTrick =[...trick];
+            console.log('players');
+
+            const playerIndex = data.players.findIndex(p => p.id === data.player.id);
+            tempTrick[playerIndex]= data.card;
+            setTrick(tempTrick);
+            console.log(tempTrick)
+            console.log(playerIndex)
         });
     }, []);
 
     const dealCards = ()=>{
-        console.log('dealCards');
         socket.emit('dealCards', {room}, ()=>{
+        socket.emit('nextPlayer', {nextPlayer: players[0]});
             
         });
     };
 
+    const playCard = (card)=>{
+        console.log('playCard by: ' + player.name)
+        socket.emit('playerPlayedCard', {player, card}, ()=>{
+            const playerIndex = players.findIndex(p => p.id === player.id);
+            const nextplayer = players[playerIndex+1] ? players[playerIndex+1] : players[0];
+            socket.emit('nextPlayer', {nextPlayer});
+            console.log('nextPlayer: ' + nextPlayer);
+            
+        });
+    };
 
 
     return(
@@ -76,7 +106,7 @@ const Doko = ({location}) => {
 
             </div>
             <div className="containerPlayerHand">
-                <PlayerHand player={player} players={players} hand={hand} trick={trick}  setTrick={setTrick}/>
+                <PlayerHand player={player} hand={hand} playCard={playCard}/>
             </div>
             <TextContainer players={players}/>
         </div>

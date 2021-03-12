@@ -21,10 +21,46 @@ const CARDS = [
     "Herz_Koenig"
   ];
 
+const INITTRICK = ['back', 'back', 'back', 'back'];
+
+const NUMBEROFPLAYERS = 4;
+
 let deck = [];
-//const hand = [];
+let players = [];
+let currentPlayerIndex =0;
+let trick = INITTRICK;
 
 
+const addPlayer = ({id, name, room}) => {
+    name = name.trim().toLowerCase();
+    room = room.trim().toLowerCase();
+
+    const existingPlayer = players.find((player) => player.room === room && player.name ===name);
+
+    if (existingPlayer) {
+        return {error: 'Playername already taken!'};
+    };
+
+    const player = {id, name, room};
+    players.push(player);
+    return {players};
+};
+
+const getPlayersInRoom = (room) => {
+    return players.filter((player) => player.room === room.trim().toLowerCase());
+
+};
+
+const getPlayer = (id) => {
+    return players.find((player)=> player.id === id);
+};
+
+const removePlayer = (id) => {
+    const index = players.findIndex((player)=> player.id === id);
+    if (index !==-1){
+        return players.splice(index, 1)[0];
+    }
+};
 
 const createDeck = () => {
     deck = [];
@@ -49,21 +85,13 @@ const dealToHand = (deck, numberOfCards, callback) => {
     return [hand, deck];
 };
 
-const dealToHands = (deck, cardsPerHand =10, numberOfHands = 4, callback) => {
-    const allottedDeck = [];
-    for(const cardsOnHand=0; cardsOnHand<cardsPerHand; cardsOnHand++) {
-        for (const handIndex=0; handIndex<numberOfHands; handIndex++){
-            const cardIndex = Math.floor(Math.random() * deck.length);
-            if (deck.length===0) {
-                callback({error: 'not enough cards in deck'});
-            } else{
-
-                const card = deck.splice(cardIndex, 1);
-                allottedDeck.push({card: card, hand: handIndex});
-            }
-        }
-    }
-    return allottedDeck;
+const playCard = (player, card) => {
+    if (player != getCurrentPlayer){
+        return error='Not your turn!';
+    };
+    trick[getIndexOfPlayer(player)]=card;
+    currentPlayerIndex = getNextPlayerIndex;
+    return trick;
 };
 
 const sortHand = (hand) =>{
@@ -88,5 +116,17 @@ const sortHand = (hand) =>{
     return sortedHand;
 }
 
+const getNextPlayerIndex = ()=>{
+    const nextPlayerIndex = (currentPlayerIndex >= NUMBEROFPLAYERS -1) ? 0 : currentPlayerIndex +1;
+    return nextPlayerIndex;
+}
 
-module.exports = {createDeck, dealToHand};
+const getCurrentPlayer = ()=>{
+    return players[currentPlayerIndex];
+}
+
+const getIndexOfPlayer = (player)=>{
+    return players.findIndex(p => p.id === player.id);
+}
+
+module.exports = {addPlayer, getPlayersInRoom, getPlayer, removePlayer, createDeck, dealToHand, playCard};
