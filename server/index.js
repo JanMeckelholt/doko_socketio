@@ -15,8 +15,9 @@ const io = socketio(server, {
 const PORT = process.env.PORT || 5000
 const router = require('./router')
 
-const {getUser, removeUser, addUser, getUsersInRoom} = require('./users');
-const {addPlayer, getPlayersInRoom, getPlayer, removePlayer, createDeck, dealToHand, playCard} = require('./doko');
+//const {getUser, removeUser, addUser, getUsersInRoom} = require('./users');
+//const {addPlayer, getPlayersInRoom, getPlayer, removePlayer, createDeck, dealToHand, playCard} = require('./doko');
+const {getGameByRoom, createGame, getPlayerById, getPlayerByIdInGame, removePlayerByIdFromGame, addPlayerToGame, createDeck, dealToHand, playCard, getGameOfPlayerbyId} = require('./doko');
 
 io.on('connection', (socket)=>{
     console.log("There is a new connection!!");
@@ -24,22 +25,20 @@ io.on('connection', (socket)=>{
     socket.on('join', ({name, room}, callback)=>{
         console.log('Name: ' + name + ' ,room: ' + room);
         console.log('soekt.id: ' +socket.id);
-        const {error, player} = addPlayer({ id: socket.id, name, room})
+        let game = getGameByRoom(room);
+        if (!game) {
+            game = createGame(room);
+        };
+        const {error, game} = addPlayerToGame({ playerId: socket.id, playerName: name, game:game})
         if(error) return callback(error);
-        console.log('player.name: ' + player.name + ', player.room: ' + player.room);
-        socket.join(player.room);
-        io.to(player.room).emit('roomData', {room: player.room, playerss: getPlayersInRoom(players.room)});
-        callback(user); 
+        socket.join(game.room);
+        io.to(game.room).emit('gameUpdate', {game});
+        callback(game); 
     });
 
-    socket.on('dealCards', ({room}, callback)=>{
+    socket.on('dealCards', ({game}, callback)=>{
         let deck = createDeck();
-        console.log(socket.id);
-        const players = getPlayersInRoom(room); 
-        console.log('players in dealCards');
-        console.log(players);
-        console.log(room);
-        players.forEach(player =>{
+        game.players.forEach(player =>{
             let hand;
             [hand, deck] = dealToHand(deck, 10, (error)=>{
                 console.log(erorr)
@@ -58,18 +57,24 @@ io.on('connection', (socket)=>{
         io.to(player.room).emit('nextPlayer', {nextPlayer});
 
      });        
-     socket.on('playerPlayedCard', ({player, card}, callback)=>{
-        const {trick, error} = playCard(player, card);
+     socket.on('playerPlaysCard', ({playerId, card, game}, callback)=>{
+         console.log('playerPlaysCard: ' + card);
+        const player = getPlayerByIdInGame(playerId, game);
+         const {trick, error} = playCard(player, card);
+        console.log(player);
+        console.log(card);
+        console.log(trick);
         if (error) return callback(error);
-        const players = getPlayersInRoom(player.room)
-        io.to(player.room).emit('cardPlayed', {player, card, players});
+        const players = game.players;
+        io.to(game.room).emit('cardPlayed', {player, card, players, trick});
      });
 
     socket.on('disconnect', ()=> {
         console.log('Connection ended!');
-        const user = removePlayer(socket.id);
-        if (user){
-            io.to(user.room).emit('roomData', {room: player.room, players: getPlayersInRoom(player.room)});
+        const game = getGameOfPlayerbyId(socket.id);
+        const game = removePlayerByIdFromGame({id: socket.id, game: game});
+        if (game){
+            io.to(game.room).emit('gameUpdate', {game});
         }
     });
 });

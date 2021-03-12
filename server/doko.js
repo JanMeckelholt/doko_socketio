@@ -22,14 +22,66 @@ const CARDS = [
   ];
 
 const INITTRICK = ['back', 'back', 'back', 'back'];
-
+const INITGAME = {trick: INITTRICK, deck: [], currentPlayerIndex:0, players:[], room:''};
 const NUMBEROFPLAYERS = 4;
 
-let deck = [];
-let players = [];
-let currentPlayerIndex =0;
-let trick = INITTRICK;
+let games =[];
 
+// let deck = [];
+// let players = [];
+// let currentPlayerIndex =0;
+// let trick = INITTRICK;
+
+// game = {deck: []}
+
+const getGameByRoom = (room) => {
+    room = room.trim().toLowerCase();
+    return games.find(game => game.room ===room);
+}
+
+const createGame = (room)=>{
+    room = room.trim().toLowerCase();
+    const existingRoom = getGameByRoom(room);
+    if (existingRoom){
+        return {error: 'Room already exists!'}
+    }
+    let game =INITGAME;
+    game.room = room;
+    games.push(game);
+    return {game};
+};
+
+const getPlayerByIdInGame = (({id, game})=>{
+    return game.players.find(p => p.id ===id);
+});
+
+const getGameOfPlayerById = (id) =>{
+    games.forEach(game => {
+        if (game.players.find(p => p.id === id)){
+            return game;
+        };
+    });
+}
+
+const addPlayerToGame = ({playerName, playerId, game}) => {
+    playerName = playerName.trim().toLowerCase();
+    const existingPlayer = game.players.find((player)=> player.name === playerName);
+    
+    if (existingPlayer) {
+        return {error: 'Playername already taken for this game!'};
+    };
+    const player = {id:id, name:playerName};
+    game.players.push(player);
+    return {game};
+}
+
+const removePlayerByIdFromGame = ({game, id})=>{
+    const playerIndex = game.players.findIndex(player => player.id === id);
+    if (playerIndex !==-1){
+        const players = game.players.splice(playerIndex,1);
+    }
+    return {game};
+}
 
 const addPlayer = ({id, name, room}) => {
     name = name.trim().toLowerCase();
@@ -43,7 +95,7 @@ const addPlayer = ({id, name, room}) => {
 
     const player = {id, name, room};
     players.push(player);
-    return {players};
+    return {player};
 };
 
 const getPlayersInRoom = (room) => {
@@ -86,12 +138,16 @@ const dealToHand = (deck, numberOfCards, callback) => {
 };
 
 const playCard = (player, card) => {
-    if (player != getCurrentPlayer){
-        return error='Not your turn!';
+    console.log(currentPlayerIndex);
+    console.log('getCurrentPlayer');
+    console.log(getCurrentPlayer().id)
+    console.log(player);
+    if (player.id != getCurrentPlayer().id){
+        return {error:'Not your turn!'};
     };
     trick[getIndexOfPlayer(player)]=card;
-    currentPlayerIndex = getNextPlayerIndex;
-    return trick;
+    currentPlayerIndex = getNextPlayerIndex();
+    return {trick: trick};
 };
 
 const sortHand = (hand) =>{
@@ -129,4 +185,5 @@ const getIndexOfPlayer = (player)=>{
     return players.findIndex(p => p.id === player.id);
 }
 
-module.exports = {addPlayer, getPlayersInRoom, getPlayer, removePlayer, createDeck, dealToHand, playCard};
+module.exports = {getGameByRoom, createGame, getGameOfPlayerbyId, getPlayerByIdInGame, removePlayerByIdFromGame, addPlayerToGame, createDeck, dealToHand, playCard};
+//addPlayer, getPlayersInRoom, getPlayer, removePlayer, 

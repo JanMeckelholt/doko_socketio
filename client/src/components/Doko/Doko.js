@@ -15,31 +15,42 @@ import PlayTable from '../PlayTable/PlayTable'
 let socket;
 
 const Doko = ({location}) => {
+
+  
+
     const SERVERENDPOINT = 'localhost:5000';
-    const [name, setName] = useState('');
-    const [room, setRoom] = useState('');
+    //const [name, setName] = useState('');
+    //const [room, setRoom] = useState('');
     
-    const [player, setPlayer] = useState('');
+    //const [player, setPlayer] = useState('');
     
 
-    const [players, setPlayers] = useState('');
+    //const [players, setPlayers] = useState('');
+    
+    const INITTRICK = ['back', 'back', 'back', 'back'];
+    const INITGAME = {trick: INITTRICK, deck: [], currentPlayerIndex:0, players:[], room:''};
+    const [game, setGame] = useState(INITGAME);
     const [hand, setHand] = useState('');
     const [trick, setTrick] = useState(['back', 'back', 'back', 'back']);
-    const [nextPlayer, setNextPlayer] = useState('');
+  //  const [nextPlayer, setNextPlayer] = useState('');
+
+    const getPlayer = () =>{
+        if (game){
+            return game.players.find(p=> p.id === socket.id);
+        }
+    }
 
     useEffect(()=>{
         const {name, room} = queryString.parse(location.search);
-        console.log(location);
-        setRoom(room);
-        setName(name);
+        // console.log(location);
+        // setRoom(room);
+        // setName(name);
         socket = io(SERVERENDPOINT);
         console.log(socket);
         console.log('name: ' + name, ', room: ' + room)
 
-        socket.emit('join', {name, room}, (player)=>{
-           // setHand(hand);
-            setPlayer(player);
-            console.log(player);
+        socket.emit('join', {name, room}, (game)=>{
+            setGame(game);
         });  
         
         return () => {
@@ -49,49 +60,42 @@ const Doko = ({location}) => {
     }, [SERVERENDPOINT, location.search]);
 
     useEffect(()=>{
-        console.log("useEffect: " + players)
-        socket.on('roomData', (data)=>{
-            console.log('roomData');
-            console.log(data);
-            setPlayers(data.users);
+        socket.on('gameUpdate', ({game})=>{
+            setGame(game);
         });        
         socket.on('newCards', (hand)=>{
             console.log('newCards')
             setHand(hand);
         });        
-        socket.on('nextPlayer', (nextPlayer)=>{
-            setNextPlayer(nextPlayer);
-        });      
+        //socket.on('nextPlayer', (nextPlayer)=>{
+        //    setNextPlayer(nextPlayer);
+        //});      
         socket.on('cardPlayed', (data)=>{
-            console.log('card: '+data.card + ' played by: ' + data.player.name)
+            console.log('card: '+ data.card + ' played by: ' + data.player.name)
             console.log('players');
-            console.log(players);
             console.log(data.players)
-            const tempTrick =[...trick];
-            console.log('players');
+            console.log(data.trick);
 
             const playerIndex = data.players.findIndex(p => p.id === data.player.id);
-            tempTrick[playerIndex]= data.card;
-            setTrick(tempTrick);
-            console.log(tempTrick)
-            console.log(playerIndex)
+            setTrick(data.trick);
         });
     }, []);
 
     const dealCards = ()=>{
-        socket.emit('dealCards', {room}, ()=>{
-        socket.emit('nextPlayer', {nextPlayer: players[0]});
+        socket.emit('dealCards', {game}, ()=>{
+    //    socket.emit('nextPlayer', {nextPlayer: players[0]});
             
         });
     };
 
     const playCard = (card)=>{
-        console.log('playCard by: ' + player.name)
-        socket.emit('playerPlayedCard', {player, card}, ()=>{
-            const playerIndex = players.findIndex(p => p.id === player.id);
-            const nextplayer = players[playerIndex+1] ? players[playerIndex+1] : players[0];
-            socket.emit('nextPlayer', {nextPlayer});
-            console.log('nextPlayer: ' + nextPlayer);
+        //console.log('playCard by: ' + player.name)
+        socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game}, (error, trick)=>{
+            if (error) {console.log(error);}
+         //   const playerIndex = players.findIndex(p => p.id === player.id);
+         //   const nextplayer = players[playerIndex+1] ? players[playerIndex+1] : players[0];
+         //   socket.emit('nextPlayer', {nextPlayer});
+          //  console.log('nextPlayer: ' + nextPlayer);
             
         });
     };
@@ -100,15 +104,15 @@ const Doko = ({location}) => {
     return(
         <div className="outerContainer">
             <div className="containerPlayTable">
-                <Infobar room={room} />
-                <PlayTable trick={trick} players={players} dealCards={dealCards}/>
+                <Infobar room={game.room} />
+                <PlayTable trick={trick} players={game.players} dealCards={dealCards}/>
                
 
             </div>
             <div className="containerPlayerHand">
-                <PlayerHand player={player} hand={hand} playCard={playCard}/>
+                <PlayerHand player={getPlayer()} hand={hand} playCard={playCard}/>
             </div>
-            <TextContainer players={players}/>
+            <TextContainer players={game.players}/>
         </div>
     )
 }
