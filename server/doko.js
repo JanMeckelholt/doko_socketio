@@ -175,8 +175,8 @@ const dealToHand = (deck, numberOfCards, callback) => {
 
 const playCard = (playerId, card, game, hand) => {
     console.log('playCard: ' + playerId);
-    console.log(card);
-    console.log(game);
+    // console.log(card);
+    // console.log(game);
     const currentPlayer = getCurrentPlayer(game);
     if (!currentPlayer){
         return {error:'Please restart Game!'}
@@ -186,13 +186,14 @@ const playCard = (playerId, card, game, hand) => {
     console.log(games[0]);
     if (currentPlayer && currentPlayer.id != playerId){
         return {error:'Not your turn!'};
-    };
-    game.trick[game.currentPlayerIndex]=card;
+    } else{
+        game.trick[game.currentPlayerIndex]=card;
+        game.currentPlayerIndex = getNextPlayerIndex(game);
+        updateGames(game);
+        hand = removeCardFromHand(card, hand);
+        return {game, hand};
+    }
 
-    game.currentPlayerIndex = getNextPlayerIndex(game);
-    updateGames(game);
-    hand = removeCardFromHand(hand, card);
-    return {game, hand};
 };
 
 const sortHand = (hand) =>{
@@ -239,10 +240,19 @@ const getGameInRoom = (room) => {
 }
 
 const updateGames = (game) => {
-    return games[games.findIndex(g => g.room = game.room)]=game;
+    if (game){
+        const gameIndex = games.findIndex(g => g.room = game.room);
+        if (game.players.length == 0) {
+            games.splice(gameIndex, 1);
+        } else{
+            games[gameIndex]=game;
+        }
+
+    }
+
 }
 
-const removeCardFromHand = ({card, hand}) =>{
+const removeCardFromHand = (card, hand) =>{
    if (card && hand){
     const cardIndex = hand.findIndex(c => c===card);
     hand.splice(cardIndex, 1);

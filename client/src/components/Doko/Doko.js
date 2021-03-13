@@ -35,7 +35,7 @@ const Doko = ({location}) => {
   //  const [nextPlayer, setNextPlayer] = useState('');
 
     const getPlayer = () =>{
-        if (game && game.players){
+        if (game && game.players && socket){
             return game.players.find(p=> p.id === socket.id);
         }
         return null;
@@ -91,6 +91,8 @@ const Doko = ({location}) => {
 
     const playCard = (card)=>{
         socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game, hand: hand}, (data)=>{
+            console.log('callback playerPlaysCard');
+            console.log(data);
             if (data && data.error) console.log(data.error);
             if (data && data.hand) setHand(data.hand);
         });
@@ -100,7 +102,7 @@ const Doko = ({location}) => {
     return(
         <div className="outerContainer">
             <div className="containerPlayTable">
-                <Infobar room={game.room} />
+                <Infobar room={game.room} playerName={getPlayer() ? getPlayer().name : '' } />
                 <PlayTable trick={trick} players={game.players} dealCards={dealCards}/>
                
 

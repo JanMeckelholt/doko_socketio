@@ -4,12 +4,13 @@ import './Infobar.css';
 
 import closeIcon from '../../icons/closeIcon.png';
 
-const Infobar = ({room}) => (
+const Infobar = ({room, playerName}) => (
     <div className="infoBar">
         <div className="leftInnerContainer">
             <h3>Play-Tabel: {room}</h3>
         </div>        
         <div className="rightInnerContainer">
+            <p class="pr-3">Name: {playerName} </p>
             <a href="/"><img src={closeIcon} alt="close"/></a>
         </div>
     </div>

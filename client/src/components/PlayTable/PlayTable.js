@@ -10,11 +10,13 @@ const cardFolder= '/cards/'
 const PlayTable = ({trick, players, dealCards}) => {
     console.log('players');
     console.log(players);
+    
     return (
     <div className="container ml-3">
+        {(trick && players) ? (
         <div class="row ">
             <div className="col-s-6">
-                {(trick && players) ? (
+                
                     <div>
                         
                         {trick.map ((card, index) => {
@@ -26,17 +28,23 @@ const PlayTable = ({trick, players, dealCards}) => {
                     })}
                     </div>
        
-                ) : null }
+                
             </div>
             <div className="col-s-6 ml-5">
                     <div>
-                        <button onClick={dealCards} className="btn btn-primary m-3">New Game</button>
+                        <button disabled={(players.length < trick.length)} onClick={dealCards} className="btn btn-primary m-3">New Game</button>
                         <button className="btn btn-primary m-3">Leave Table</button>
                     </div>
-
+                  
+                    {(players.length < trick.length)? (
+                        <div>
+                            <p>You need {`${trick.length}`} players to start.</p>
+                            <p>Invite more players to your room!</p>
+                        </div>
+                    ) : null}
             </div>
         </div>
-       
+       ) : null }
     </div>
     )
 };
