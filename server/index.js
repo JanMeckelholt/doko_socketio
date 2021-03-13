@@ -39,7 +39,7 @@ io.on('connection', (socket)=>{
     });
 
     socket.on('dealCards', (game, callback)=>{
-        let deck = createDeck();
+        let deck = createDeck(game);
         game.players.forEach(player =>{
             let hand;
             [hand, deck] = dealToHand(deck, 10, (error)=>{
@@ -60,15 +60,14 @@ io.on('connection', (socket)=>{
 
      });        
      socket.on('playerPlaysCard', ({playerId, card, game}, callback)=>{
+         console.log('playerPlaysCard: ' + playerId);
          console.log('playerPlaysCard: ' + card);
-        const player = getPlayerByIdInGame(playerId, game);
-         const {trick, error} = playCard(player, card);
-        console.log(player);
-        console.log(card);
-        console.log(trick);
-        if (error) return callback(error);
-        const players = game.players;
-        io.to(game.room).emit('cardPlayed', {player, card, players, trick});
+         console.log('playerPlaysCard: ' + game);
+         console.log(game);
+       // const player = getPlayerByIdInGame({playerId, game});
+        const gameOrError = playCard(playerId, card, game);
+        if(gameOrError.error) return callback(gameOrError.error);
+        io.to(game.room).emit('gameUpdate', gameOrError);
      });
 
     socket.on('disconnect', ()=> {
@@ -78,7 +77,7 @@ io.on('connection', (socket)=>{
         console.log('disconnect: '+game);
         if (game){
             game = removePlayerByIdFromRoom({id: socket.id, room: game.room});
-            io.to(game.room).emit('gameUpdate', {game});
+            io.to(game.room).emit('gameUpdate', game);
         }
     });
 });

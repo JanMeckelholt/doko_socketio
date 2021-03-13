@@ -63,10 +63,12 @@ const Doko = ({location}) => {
     useEffect(()=>{
         socket.on('gameUpdate', (game)=>{
             setGame(game);
+            setTrick(game.trick)
         });        
         socket.on('newCards', (hand)=>{
             console.log('newCards')
             setHand(hand);
+            setTrick(INITTRICK);
         });        
         //socket.on('nextPlayer', (nextPlayer)=>{
         //    setNextPlayer(nextPlayer);
@@ -83,21 +85,13 @@ const Doko = ({location}) => {
     }, []);
 
     const dealCards = ()=>{
-        socket.emit('dealCards', game, ()=>{
-    //    socket.emit('nextPlayer', {nextPlayer: players[0]});
-            
+        socket.emit('dealCards', game, ()=>{          
         });
     };
 
     const playCard = (card)=>{
-        //console.log('playCard by: ' + player.name)
-        socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game}, (error, trick)=>{
+        socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game}, (error)=>{
             if (error) {console.log(error);}
-         //   const playerIndex = players.findIndex(p => p.id === player.id);
-         //   const nextplayer = players[playerIndex+1] ? players[playerIndex+1] : players[0];
-         //   socket.emit('nextPlayer', {nextPlayer});
-          //  console.log('nextPlayer: ' + nextPlayer);
-            
         });
     };
 

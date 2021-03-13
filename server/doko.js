@@ -147,12 +147,15 @@ const removePlayerByIdFromRoom = ({room, id})=>{
 //     }
 // };
 
-const createDeck = () => {
+const createDeck = (game) => {
     deck = [];
     CARDS.forEach(card => {
         deck.push(card);
         deck.push(card);
     })
+    game.deck = deck;
+    game.trick = INITTRICK;
+    updateGames(game);
     return deck;
 };
 
@@ -170,17 +173,24 @@ const dealToHand = (deck, numberOfCards, callback) => {
     return [hand, deck];
 };
 
-const playCard = (player, card) => {
-    console.log(currentPlayerIndex);
-    console.log('getCurrentPlayer');
-    console.log(getCurrentPlayer().id)
-    console.log(player);
-    if (player.id != getCurrentPlayer().id){
+const playCard = (playerId, card, game) => {
+    console.log('playCard: ' + playerId);
+    console.log(card);
+    console.log(game);
+    const currentPlayer = getCurrentPlayer(game);
+    if (!currentPlayer){
+        return {error:'Please restart Game!'}
+    }
+    console.log(currentPlayer);
+    console.log(games);
+    console.log(games[0]);
+    if (currentPlayer && currentPlayer.id != playerId){
         return {error:'Not your turn!'};
     };
-    trick[getIndexOfPlayer(player)]=card;
-    currentPlayerIndex = getNextPlayerIndex();
-    return {trick: trick};
+    game.trick[game.currentPlayerIndex]=card;
+    game.currentPlayerIndex = getNextPlayerIndex(game);
+    updateGames(game);
+    return game;
 };
 
 const sortHand = (hand) =>{
@@ -211,7 +221,11 @@ const getNextPlayerIndex = (game)=>{
 }
 
 const getCurrentPlayer = (game)=>{
-    return game.players[currentPlayerIndex];
+    console.log('getCurrentPlayer');
+    console.log(game);
+    
+
+    return game.players[game.currentPlayerIndex];
 }
 
 const getIndexOfPlayer = ({game, player})=>{
