@@ -173,7 +173,7 @@ const dealToHand = (deck, numberOfCards, callback) => {
     return [hand, deck];
 };
 
-const playCard = (playerId, card, game) => {
+const playCard = (playerId, card, game, hand) => {
     console.log('playCard: ' + playerId);
     console.log(card);
     console.log(game);
@@ -188,9 +188,11 @@ const playCard = (playerId, card, game) => {
         return {error:'Not your turn!'};
     };
     game.trick[game.currentPlayerIndex]=card;
+
     game.currentPlayerIndex = getNextPlayerIndex(game);
     updateGames(game);
-    return game;
+    hand = removeCardFromHand(hand, card);
+    return {game, hand};
 };
 
 const sortHand = (hand) =>{
@@ -238,6 +240,14 @@ const getGameInRoom = (room) => {
 
 const updateGames = (game) => {
     return games[games.findIndex(g => g.room = game.room)]=game;
+}
+
+const removeCardFromHand = ({card, hand}) =>{
+   if (card && hand){
+    const cardIndex = hand.findIndex(c => c===card);
+    hand.splice(cardIndex, 1);
+   }
+   return hand;
 }
 
 module.exports = {getGameByRoom, createGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard};

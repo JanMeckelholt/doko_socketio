@@ -59,15 +59,17 @@ io.on('connection', (socket)=>{
         io.to(player.room).emit('nextPlayer', {nextPlayer});
 
      });        
-     socket.on('playerPlaysCard', ({playerId, card, game}, callback)=>{
+     socket.on('playerPlaysCard', ({playerId, card, game, hand}, callback)=>{
          console.log('playerPlaysCard: ' + playerId);
          console.log('playerPlaysCard: ' + card);
          console.log('playerPlaysCard: ' + game);
          console.log(game);
        // const player = getPlayerByIdInGame({playerId, game});
-        const gameOrError = playCard(playerId, card, game);
-        if(gameOrError.error) return callback(gameOrError.error);
-        io.to(game.room).emit('gameUpdate', gameOrError);
+       
+       const data = playCard(playerId, card, game, hand);
+        if(data.error) return callback({error:data.error});
+        io.to(game.room).emit('gameUpdate', data.game);
+        callback({hand: data.hand})
      });
 
     socket.on('disconnect', ()=> {

@@ -90,8 +90,9 @@ const Doko = ({location}) => {
     };
 
     const playCard = (card)=>{
-        socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game}, (error)=>{
-            if (error) {console.log(error);}
+        socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game, hand: hand}, (data)=>{
+            if (data && data.error) console.log(data.error);
+            if (data && data.hand) setHand(data.hand);
         });
     };
 
