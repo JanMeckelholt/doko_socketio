@@ -14,12 +14,13 @@ const PlayTable = ({trick, players, dealCards}) => {
     <div className="container ml-3">
         <div class="row ">
             <div className="col-s-6">
-                {trick ? (
+                {(trick && players) ? (
                     <div>
+                        
                         {trick.map ((card, index) => {
                         const playerName = players[index] ? players[index].name : 'empty Chair';
                         return (
-                            <TrickCard card={card} player={playerName}/>
+                            <TrickCard kex={index} card={card} player={playerName}/>
                     // console.log('user in room: ' + user.name)
                         )
                     })}

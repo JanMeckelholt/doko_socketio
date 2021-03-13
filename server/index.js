@@ -17,7 +17,7 @@ const router = require('./router')
 
 //const {getUser, removeUser, addUser, getUsersInRoom} = require('./users');
 //const {addPlayer, getPlayersInRoom, getPlayer, removePlayer, createDeck, dealToHand, playCard} = require('./doko');
-const {getGameByRoom, createGame, getPlayerById, getPlayerByIdInGame, removePlayerByIdFromGame, addPlayerToGame, createDeck, dealToHand, playCard, getGameOfPlayerbyId} = require('./doko');
+const {getGameByRoom, createGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard} = require('./doko');
 
 io.on('connection', (socket)=>{
     console.log("There is a new connection!!");
@@ -29,14 +29,16 @@ io.on('connection', (socket)=>{
         if (!game) {
             game = createGame(room);
         };
-        const {error, game} = addPlayerToGame({ playerId: socket.id, playerName: name, game:game})
-        if(error) return callback(error);
+        const gameOrError = addPlayerToRoom({ playerId: socket.id, playerName: name, room:room})
+        if(gameOrError.error) return callback(gameOrError.error);
+        game = gameOrError;
+        console.log(game);
         socket.join(game.room);
-        io.to(game.room).emit('gameUpdate', {game});
+        io.to(game.room).emit('gameUpdate', game);
         callback(game); 
     });
 
-    socket.on('dealCards', ({game}, callback)=>{
+    socket.on('dealCards', (game, callback)=>{
         let deck = createDeck();
         game.players.forEach(player =>{
             let hand;
@@ -71,9 +73,11 @@ io.on('connection', (socket)=>{
 
     socket.on('disconnect', ()=> {
         console.log('Connection ended!');
-        const game = getGameOfPlayerbyId(socket.id);
-        const game = removePlayerByIdFromGame({id: socket.id, game: game});
+        console.log(socket.id);
+        let game = getGameOfPlayerById(socket.id);
+        console.log('disconnect: '+game);
         if (game){
+            game = removePlayerByIdFromRoom({id: socket.id, room: game.room});
             io.to(game.room).emit('gameUpdate', {game});
         }
     });

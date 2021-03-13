@@ -48,7 +48,8 @@ const createGame = (room)=>{
     let game =INITGAME;
     game.room = room;
     games.push(game);
-    return {game};
+    console.log(game);
+    return game;
 };
 
 const getPlayerByIdInGame = (({id, game})=>{
@@ -56,63 +57,95 @@ const getPlayerByIdInGame = (({id, game})=>{
 });
 
 const getGameOfPlayerById = (id) =>{
-    games.forEach(game => {
-        if (game.players.find(p => p.id === id)){
-            return game;
-        };
+    console.log('getGameOfPlayerById: '+ id);
+    console.log('getGameOfPlayerById: '+ games);
+    console.log(games);
+    console.log(games[0]);
+    let game;
+    games.forEach(g => {
+        if (g.players.find(p => p.id === id)) {
+            console.log('gameOfPlayerById found');
+            console.log(g);
+            game = g;
+        }
     });
+    return game;
 }
 
-const addPlayerToGame = ({playerName, playerId, game}) => {
+const addPlayerToRoom = ({playerName, playerId, room}) => {
     playerName = playerName.trim().toLowerCase();
-    const existingPlayer = game.players.find((player)=> player.name === playerName);
-    
-    if (existingPlayer) {
-        return {error: 'Playername already taken for this game!'};
-    };
-    const player = {id:id, name:playerName};
-    game.players.push(player);
-    return {game};
-}
-
-const removePlayerByIdFromGame = ({game, id})=>{
-    const playerIndex = game.players.findIndex(player => player.id === id);
-    if (playerIndex !==-1){
-        const players = game.players.splice(playerIndex,1);
-    }
-    return {game};
-}
-
-const addPlayer = ({id, name, room}) => {
-    name = name.trim().toLowerCase();
     room = room.trim().toLowerCase();
-
-    const existingPlayer = players.find((player) => player.room === room && player.name ===name);
-
-    if (existingPlayer) {
-        return {error: 'Playername already taken!'};
+    game = getGameInRoom(room);
+    console.log('addPlayerToRoom: ' + playerName)
+    console.log('addPlayerToRoom: ' + playerId)
+    console.log('addPlayerToRoom: ' + room)
+    console.log('addPlayerToRoom: ' + game)
+    if (game && game.players && game.players.length >= NUMBEROFPLAYERS ){
+        return {error: 'Game is already full!'};
     };
+    if (game && game.players){
+        const playerWithName = game.players.find((p)=> p.name === playerName);
+        if (playerWithName && playerWithName.id === playerId){
+            return game; // player already part of that game
+        };
+        if (playerWithName) {
+            return {error: 'Playername already taken for this game!'};
+        };
+    };
+    const player = {id: playerId, name:playerName};
+    console.log(game);
+    console.log(game.players);
+    game.players.push(player);
+    updateGames(game);
+    return game;
+}
 
-    const player = {id, name, room};
-    players.push(player);
-    return {player};
-};
-
-const getPlayersInRoom = (room) => {
-    return players.filter((player) => player.room === room.trim().toLowerCase());
-
-};
-
-const getPlayer = (id) => {
-    return players.find((player)=> player.id === id);
-};
-
-const removePlayer = (id) => {
-    const index = players.findIndex((player)=> player.id === id);
-    if (index !==-1){
-        return players.splice(index, 1)[0];
+const removePlayerByIdFromRoom = ({room, id})=>{
+    console.log('remoPlayerByIdFromRoom: ' + room)
+    console.log('remoPlayerByIdFromRoom: ' + id)
+    const game = games.find(g=> g.room ===room);
+    console.log('remPlay: ' + game);
+    console.log(game);
+    if (game && game.players) {
+        const playerIndex = game.players.findIndex(player => player.id === id);
+        if (playerIndex !==-1){
+            const players = game.players.splice(playerIndex,1);
+            updateGames(game);
+        }
     }
-};
+    return game;
+}
+
+// const addPlayer = ({id, name, room}) => {
+//     name = name.trim().toLowerCase();
+//     room = room.trim().toLowerCase();
+
+//     const existingPlayer = players.find((player) => player.room === room && player.name ===name);
+
+//     if (existingPlayer) {
+//         return {error: 'Playername already taken!'};
+//     };
+
+//     const player = {id, name, room};
+//     players.push(player);
+//     return player;
+// };
+
+// const getPlayersInRoom = (room) => {
+//     return players.filter((player) => player.room === room.trim().toLowerCase());
+
+// };
+
+// const getPlayer = (id) => {
+//     return players.find((player)=> player.id === id);
+// };
+
+// const removePlayer = (id) => {
+//     const index = players.findIndex((player)=> player.id === id);
+//     if (index !==-1){
+//         return players.splice(index, 1)[0];
+//     }
+// };
 
 const createDeck = () => {
     deck = [];
@@ -172,18 +205,26 @@ const sortHand = (hand) =>{
     return sortedHand;
 }
 
-const getNextPlayerIndex = ()=>{
-    const nextPlayerIndex = (currentPlayerIndex >= NUMBEROFPLAYERS -1) ? 0 : currentPlayerIndex +1;
+const getNextPlayerIndex = (game)=>{
+    const nextPlayerIndex = (game.currentPlayerIndex >= NUMBEROFPLAYERS -1) ? 0 : game.currentPlayerIndex +1;
     return nextPlayerIndex;
 }
 
-const getCurrentPlayer = ()=>{
-    return players[currentPlayerIndex];
+const getCurrentPlayer = (game)=>{
+    return game.players[currentPlayerIndex];
 }
 
-const getIndexOfPlayer = (player)=>{
-    return players.findIndex(p => p.id === player.id);
+const getIndexOfPlayer = ({game, player})=>{
+    return game.players.findIndex(p => p.id === player.id);
 }
 
-module.exports = {getGameByRoom, createGame, getGameOfPlayerbyId, getPlayerByIdInGame, removePlayerByIdFromGame, addPlayerToGame, createDeck, dealToHand, playCard};
+const getGameInRoom = (room) => {
+    return games.find(g => g.room === room.trim().toLowerCase());
+}
+
+const updateGames = (game) => {
+    return games[games.findIndex(g => g.room = game.room)]=game;
+}
+
+module.exports = {getGameByRoom, createGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard};
 //addPlayer, getPlayersInRoom, getPlayer, removePlayer, 

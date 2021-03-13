@@ -35,9 +35,10 @@ const Doko = ({location}) => {
   //  const [nextPlayer, setNextPlayer] = useState('');
 
     const getPlayer = () =>{
-        if (game){
+        if (game && game.players){
             return game.players.find(p=> p.id === socket.id);
         }
+        return null;
     }
 
     useEffect(()=>{
@@ -60,7 +61,7 @@ const Doko = ({location}) => {
     }, [SERVERENDPOINT, location.search]);
 
     useEffect(()=>{
-        socket.on('gameUpdate', ({game})=>{
+        socket.on('gameUpdate', (game)=>{
             setGame(game);
         });        
         socket.on('newCards', (hand)=>{
@@ -82,7 +83,7 @@ const Doko = ({location}) => {
     }, []);
 
     const dealCards = ()=>{
-        socket.emit('dealCards', {game}, ()=>{
+        socket.emit('dealCards', game, ()=>{
     //    socket.emit('nextPlayer', {nextPlayer: players[0]});
             
         });
