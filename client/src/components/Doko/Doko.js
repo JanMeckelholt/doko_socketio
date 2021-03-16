@@ -14,6 +14,7 @@ import PlayTable from '../PlayTable/PlayTable'
 
 let socket;
 
+
 const Doko = ({location}) => {
 
   
@@ -26,7 +27,8 @@ const Doko = ({location}) => {
     
 
     //const [players, setPlayers] = useState('');
-    
+    const [connected, setConnected] = useState(false);
+
     const INITTRICK = ['back', 'back', 'back', 'back'];
     const INITGAME = {trick: INITTRICK, deck: [], currentPlayerIndex:0, players:[], room:''};
     const [game, setGame] = useState(INITGAME);
@@ -49,18 +51,30 @@ const Doko = ({location}) => {
         socket = io(SERVERENDPOINT);
         console.log(socket);
         console.log('name: ' + name, ', room: ' + room)
-
+        setConnected(true);
         socket.emit('join', {name, room}, (game)=>{
             setGame(game);
         });  
+
         
         return () => {
             socket.close();
+            setConnected(false);
         }
         
     }, [SERVERENDPOINT, location.search]);
 
     useEffect(()=>{
+        socket.on('connect_error', () => {
+            console.log('Failed to connect to server');
+            setConnected(false);
+            setTimeout(() => {
+              socket.connect();
+            }, 1000);
+        });
+        socket.on('connect', ()=>{
+            setConnected(true);
+        });  
         socket.on('gameUpdate', (game)=>{
             setGame(game);
             setTrick(game.trick)
@@ -100,17 +114,25 @@ const Doko = ({location}) => {
 
 
     return(
-        <div className="outerContainer">
-            <div className="containerPlayTable">
-                <Infobar room={game.room} playerName={getPlayer() ? getPlayer().name : '' } />
-                <PlayTable trick={trick} players={game.players} dealCards={dealCards}/>
-               
+        <div>
+            {(connected) ? (
+                <div className="outerContainer">
+                <div className="containerPlayTable">
+                    <Infobar room={game.room} playerName={getPlayer() ? getPlayer().name : '' } />
+                    <PlayTable trick={trick} players={game.players} dealCards={dealCards}/>
+                
 
+                </div>
+                <div className="containerPlayerHand">
+                    <PlayerHand player={getPlayer()} hand={hand} playCard={playCard}/>
+                </div>
+                <TextContainer players={game.players}/>
             </div>
-            <div className="containerPlayerHand">
-                <PlayerHand player={getPlayer()} hand={hand} playCard={playCard}/>
-            </div>
-            <TextContainer players={game.players}/>
+            ): (
+                <div>
+                    <h1>Server seems to be down!</h1>
+                </div>
+            )}
         </div>
     )
 }
