@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import io from 'socket.io-client';
 
@@ -15,36 +15,36 @@ import PlayTable from '../PlayTable/PlayTable'
 let socket;
 
 
-const Doko = ({location}) => {
+const Doko = ({ location }) => {
 
-  
+
 
     const SERVERENDPOINT = 'localhost:5000';
     //const [name, setName] = useState('');
     //const [room, setRoom] = useState('');
-    
+
     //const [player, setPlayer] = useState('');
-    
+
 
     //const [players, setPlayers] = useState('');
     const [connected, setConnected] = useState(false);
 
     const INITTRICK = ['back', 'back', 'back', 'back'];
-    const INITGAME = {trick: INITTRICK, deck: [], currentPlayerIndex:0, players:[], room:''};
+    const INITGAME = { started: false, trick: INITTRICK, deck: [], currentPlayerIndex: 0, players: [], room: '' };
     const [game, setGame] = useState(INITGAME);
     const [hand, setHand] = useState('');
     const [trick, setTrick] = useState(['back', 'back', 'back', 'back']);
-  //  const [nextPlayer, setNextPlayer] = useState('');
+    //  const [nextPlayer, setNextPlayer] = useState('');
 
-    const getPlayer = () =>{
-        if (game && game.players && socket){
-            return game.players.find(p=> p.id === socket.id);
+    const getPlayer = () => {
+        if (game && game.players && socket) {
+            return game.players.find(p => p.id === socket.id);
         }
         return null;
     }
 
-    useEffect(()=>{
-        const {name, room} = queryString.parse(location.search);
+    useEffect(() => {
+        const { name, room } = queryString.parse(location.search);
         // console.log(location);
         // setRoom(room);
         // setName(name);
@@ -52,43 +52,46 @@ const Doko = ({location}) => {
         console.log(socket);
         console.log('name: ' + name, ', room: ' + room)
         setConnected(true);
-        socket.emit('join', {name, room}, (game)=>{
+        socket.emit('join', { name, room }, (game) => {
             setGame(game);
-        });  
+        });
 
-        
+
         return () => {
             socket.close();
             setConnected(false);
         }
-        
+
     }, [SERVERENDPOINT, location.search]);
 
-    useEffect(()=>{
+    useEffect(() => {
         socket.on('connect_error', () => {
             console.log('Failed to connect to server');
             setConnected(false);
             setTimeout(() => {
-              socket.connect();
+                socket.connect();
             }, 1000);
         });
-        socket.on('connect', ()=>{
+        socket.on('connect', () => {
             setConnected(true);
-        });  
-        socket.on('gameUpdate', (game)=>{
+        });
+        socket.on('gameUpdate', (game) => {
             setGame(game);
             setTrick(game.trick)
-        });        
-        socket.on('newCards', (hand)=>{
+        });
+        socket.on('newCards', ({ hand, game }) => {
             console.log('newCards')
+            console.log(hand);
+            console.log(game);
             setHand(hand);
             setTrick(INITTRICK);
-        });        
+            setGame(game);
+        });
         //socket.on('nextPlayer', (nextPlayer)=>{
         //    setNextPlayer(nextPlayer);
         //});      
-        socket.on('cardPlayed', (data)=>{
-            console.log('card: '+ data.card + ' played by: ' + data.player.name)
+        socket.on('cardPlayed', (data) => {
+            console.log('card: ' + data.card + ' played by: ' + data.player.name)
             console.log('players');
             console.log(data.players)
             console.log(data.trick);
@@ -98,13 +101,20 @@ const Doko = ({location}) => {
         });
     }, []);
 
-    const dealCards = ()=>{
-        socket.emit('dealCards', game, ()=>{          
-        });
+    const dealCards = (confirmMessage) => {
+        console.log('confirmMessage: ')
+        console.log(confirmMessage);
+        console.log(!confirmMessage);
+        if (!confirmMessage || window.confirm(confirmMessage)) {
+
+            socket.emit('dealCards', game, () => {
+            });
+        }
+
     };
 
-    const playCard = (card)=>{
-        socket.emit('playerPlaysCard', {playerId: socket.id, card: card, game: game, hand: hand}, (data)=>{
+    const playCard = (card) => {
+        socket.emit('playerPlaysCard', { playerId: socket.id, card: card, game: game, hand: hand }, (data) => {
             console.log('callback playerPlaysCard');
             console.log(data);
             if (data && data.error) console.log(data.error);
@@ -113,22 +123,22 @@ const Doko = ({location}) => {
     };
 
 
-    return(
+    return (
         <div>
             {(connected) ? (
                 <div className="outerContainer">
-                <div className="containerPlayTable">
-                    <Infobar room={game.room} playerName={getPlayer() ? getPlayer().name : '' } />
-                    <PlayTable trick={trick} players={game.players} dealCards={dealCards}/>
-                
+                    <div className="containerPlayTable">
+                        <Infobar room={game ? game.room : ''} playerName={getPlayer() ? getPlayer().name : ''} />
+                        <PlayTable trick={trick} game={game} dealCards={dealCards} />
 
+
+                    </div>
+                    <div className="containerPlayerHand">
+                        <PlayerHand player={getPlayer()} hand={hand} playCard={playCard} />
+                    </div>
+                    <TextContainer players={game ? game.players : []} />
                 </div>
-                <div className="containerPlayerHand">
-                    <PlayerHand player={getPlayer()} hand={hand} playCard={playCard}/>
-                </div>
-                <TextContainer players={game.players}/>
-            </div>
-            ): (
+            ) : (
                 <div>
                     <h1>Server seems to be down!</h1>
                 </div>

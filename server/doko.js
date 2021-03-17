@@ -22,7 +22,7 @@ const CARDS = [
   ];
 
 const INITTRICK = ['back', 'back', 'back', 'back'];
-const INITGAME = {trick: INITTRICK, deck: [], currentPlayerIndex:0, players:[], room:''};
+const INITGAME = {started: false, trick: INITTRICK, deck: [], currentPlayerIndex:0, players:[], room:''};
 const NUMBEROFPLAYERS = 4;
 
 let games =[];
@@ -50,6 +50,13 @@ const createGame = (room)=>{
     games.push(game);
     console.log(game);
     return game;
+};
+
+
+const startGame = (game)=>{
+    const gameIndex = games.findIndex(g => g.room === game.room);
+    games[gameIndex].started = true;
+    return games[gameIndex];
 };
 
 const getPlayerByIdInGame = (({id, game})=>{
@@ -260,5 +267,5 @@ const removeCardFromHand = (card, hand) =>{
    return hand;
 }
 
-module.exports = {getGameByRoom, createGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard};
+module.exports = {getGameByRoom, createGame, startGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard};
 //addPlayer, getPlayersInRoom, getPlayer, removePlayer, 

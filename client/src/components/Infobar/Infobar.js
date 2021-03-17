@@ -10,7 +10,7 @@ const Infobar = ({room, playerName}) => (
             <h3>Play-Tabel: {room}</h3>
         </div>        
         <div className="rightInnerContainer">
-            <p class="pr-3">Name: {playerName} </p>
+            <p className="pr-3">Name: {playerName} </p>
             <a href="/"><img src={closeIcon} alt="close"/></a>
         </div>
     </div>
