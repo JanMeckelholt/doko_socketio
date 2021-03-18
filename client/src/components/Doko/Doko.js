@@ -112,6 +112,13 @@ const Doko = ({ location }) => {
         }
 
     };
+    const claimTrick = () => {
+        socket.emit('claimTrick', { game: game, trick: trick }, () => {
+        });
+
+
+    };
+
 
     const playCard = (card) => {
         socket.emit('playerPlaysCard', { playerId: socket.id, card: card, game: game, hand: hand }, (data) => {
@@ -129,7 +136,7 @@ const Doko = ({ location }) => {
                 <div className="outerContainer">
                     <div className="containerPlayTable">
                         <Infobar room={game ? game.room : ''} playerName={getPlayer() ? getPlayer().name : ''} />
-                        <PlayTable trick={trick} game={game} dealCards={dealCards} />
+                        <PlayTable trick={trick} game={game} dealCards={dealCards} claimTrick={claimTrick} />
 
 
                     </div>

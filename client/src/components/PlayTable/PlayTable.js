@@ -7,16 +7,19 @@ const cardFolder = '/cards/'
 
 
 
-const PlayTable = ({ trick, game, dealCards }) => {
-    const handleClick = (e) =>{
+const PlayTable = ({ trick, game, dealCards, claimTrick }) => {
+    const handleClick = (e) => {
         e.preventDefault();
         if (e.target.id === 'startGame') {
             dealCards('');
-        }       
+        }
         if (e.target.id === 'restartGame') {
             dealCards('Do you really want to abort the current game?');
         }
-       
+        if (e.target.id === 'claimTrick') {
+            claimTrick();
+        }
+
         // const tempTrick =[...trick];
         // const playerIndex = players.findIndex(p => p.id === player.id);
         // tempTrick[playerIndex]= `${e.target.id}`;
@@ -49,13 +52,28 @@ const PlayTable = ({ trick, game, dealCards }) => {
                             <div>
                                 {(game.started) ? (
                                     <div>
-                                        <p>Player to play Card: {`${game.players[game.currentPlayerIndex].name}`}</p>
-                                        <button 
+                                        {(trick.findIndex(c=> c==='back') === -1) ? (
+                                            <div>
+                                                <p>test</p>
+                                                <button
+                                                    id="claimTrick"
+                                                    onClick={handleClick}
+                                                    className="btn btn-primary m-3">
+                                                    Claim Trick
+                                        </button>
+                                            </div>
+                                        ) :
+                                            (<div>
+                                                <p>Player to play Card: {`${game.players[game.currentPlayerIndex].name}`}</p>
+                                            </div>
+                                            )}
+
+                                        <button
                                             id="restartGame"
-                                            disabled={(game.players.length < trick.length)} 
+                                            disabled={(game.players.length < trick.length)}
                                             onClick={handleClick}
                                             className="btn btn-danger m-3">
-                                                Abort Game and start new
+                                            Abort Game and start new
                                         </button>
                                     </div>
                                 ) : (
@@ -78,7 +96,7 @@ const PlayTable = ({ trick, game, dealCards }) => {
 
 
 
-                            
+
                         </div>
                     </div>
                 </div>

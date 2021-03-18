@@ -99,7 +99,7 @@ const addPlayerToRoom = ({playerName, playerId, room}) => {
             return {error: 'Playername already taken for this game!'};
         };
     };
-    const player = {id: playerId, name:playerName};
+    const player = {id: playerId, name:playerName, tricks:[]};
     console.log(game);
     console.log(game.players);
     game.players.push(player);
@@ -203,6 +203,17 @@ const playCard = (playerId, card, game, hand) => {
 
 };
 
+const claimTrick = (game, trick, player) =>{
+    console.log('player')
+    console.log(player)
+    player.tricks.push(trick);
+    game.players = updatePlayers(game.players, player);
+    game.currentPlayerIndex = getIndexOfPlayer({game: game, player: player});
+    game.trick = INITTRICK
+    updateGames(game);
+    return game;
+}
+
 const sortHand = (hand) =>{
     // console.log('hand: '+hand);
     var len = hand.length;
@@ -246,6 +257,14 @@ const getGameInRoom = (room) => {
     return games.find(g => g.room === room.trim().toLowerCase());
 }
 
+const updatePlayers = (players, player) => {
+    if (player && players){
+        const playerIndex = players.findIndex(p => p.id === player.id);
+        players[playerIndex]=player;
+    }
+    return players;
+}
+
 const updateGames = (game) => {
     if (game){
         const gameIndex = games.findIndex(g => g.room = game.room);
@@ -267,5 +286,5 @@ const removeCardFromHand = (card, hand) =>{
    return hand;
 }
 
-module.exports = {getGameByRoom, createGame, startGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard};
+module.exports = {getGameByRoom, createGame, startGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard, claimTrick, getIndexOfPlayer};
 //addPlayer, getPlayersInRoom, getPlayer, removePlayer, 

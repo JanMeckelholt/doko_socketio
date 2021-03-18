@@ -17,7 +17,7 @@ const router = require('./router')
 
 //const {getUser, removeUser, addUser, getUsersInRoom} = require('./users');
 //const {addPlayer, getPlayersInRoom, getPlayer, removePlayer, createDeck, dealToHand, playCard} = require('./doko');
-const {getGameByRoom, createGame, startGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard} = require('./doko');
+const {getGameByRoom, createGame, startGame, getGameOfPlayerById, getPlayerByIdInGame, removePlayerByIdFromRoom, addPlayerToRoom, createDeck, dealToHand, playCard, claimTrick, getIndexOfPlayer} = require('./doko');
 
 io.on('connection', (socket)=>{
     console.log("There is a new connection!!");
@@ -54,12 +54,20 @@ io.on('connection', (socket)=>{
         });
 
     });
-            
-    socket.on('nextPlayer', ({nextPlayer}, callback)=>{
-        const player = getPlayer(socket.id);
-        io.to(player.room).emit('nextPlayer', {nextPlayer});
+    
+    socket.on('claimTrick', ({game, trick}, callback)=>{
+        const player = getPlayerByIdInGame({id: socket.id, game: game});
+        //const playerIndex = getIndexOfPlayer(game, player);
+        game = claimTrick(game, trick, player);
+        io.to(game.room).emit('gameUpdate', game);
 
-     });        
+     }); 
+
+    // socket.on('nextPlayer', ({nextPlayer}, callback)=>{
+    //     const player = getPlayer(socket.id);
+    //     io.to(player.room).emit('nextPlayer', {nextPlayer});
+
+    //  });        
      socket.on('playerPlaysCard', ({playerId, card, game, hand}, callback)=>{
        const data = playCard(playerId, card, game, hand);
         if(data.error) {
