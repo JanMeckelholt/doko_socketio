@@ -45,9 +45,13 @@ const createGame = (room)=>{
     if (existingRoom){
         return {error: 'Room already exists!'}
     }
-    let game =INITGAME;
+    let game = JSON.parse(JSON.stringify(INITGAME));
+    //let game =INITGAME;
+    console.log('createGame - INITGAME: ');
+    console.log(INITGAME);
     game.room = room;
     games.push(game);
+    console.log('createGame: ');
     console.log(game);
     return game;
 };

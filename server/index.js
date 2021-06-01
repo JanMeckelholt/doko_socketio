@@ -26,12 +26,12 @@ io.on('connection', (socket)=>{
         console.log('Name: ' + name + ' ,room: ' + room);
         console.log('soekt.id: ' +socket.id);
         let game = getGameByRoom(room);
+        console.log('game from getGameByRoom: ' + game)
         if (!game) {
             game = createGame(room);
         };
-        const gameOrError = addPlayerToRoom({ playerId: socket.id, playerName: name, room:room})
-        if(gameOrError.error) return callback(gameOrError.error);
-        game = gameOrError;
+        game = addPlayerToRoom({ playerId: socket.id, playerName: name, room:room})
+        if(game.error) return callback(game);
         console.log(game);
         socket.join(game.room);
         io.to(game.room).emit('gameUpdate', game);

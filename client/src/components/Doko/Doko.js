@@ -53,6 +53,9 @@ const Doko = ({ location }) => {
         console.log('name: ' + name, ', room: ' + room)
         setConnected(true);
         socket.emit('join', { name, room }, (game) => {
+            if (game.error) {
+                //location.pathname = "/"
+            }
             setGame(game);
         });
 
@@ -115,10 +118,12 @@ const Doko = ({ location }) => {
     const claimTrick = () => {
         socket.emit('claimTrick', { game: game, trick: trick }, () => {
         });
-
-
     };
 
+    const leaveTable = () => {
+        socket.close();
+        setConnected(false);
+    }
 
     const playCard = (card) => {
         socket.emit('playerPlaysCard', { playerId: socket.id, card: card, game: game, hand: hand }, (data) => {
@@ -136,7 +141,7 @@ const Doko = ({ location }) => {
                 <div className="outerContainer">
                     <div className="containerPlayTable">
                         <Infobar room={game ? game.room : ''} playerName={getPlayer() ? getPlayer().name : ''} />
-                        <PlayTable trick={trick} game={game} dealCards={dealCards} claimTrick={claimTrick} />
+                        <PlayTable trick={trick} game={game} dealCards={dealCards} claimTrick={claimTrick} leaveTable={leaveTable} />
 
 
                     </div>
@@ -148,6 +153,7 @@ const Doko = ({ location }) => {
             ) : (
                 <div>
                     <h1>Server seems to be down!</h1>
+                    <a href="/">Back to Login</a>
                 </div>
             )}
         </div>

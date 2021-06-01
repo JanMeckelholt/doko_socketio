@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 import './PlayTable.css';
 import TrickCard from './TrickCard/TrickCard';
@@ -7,7 +8,7 @@ const cardFolder = '/cards/'
 
 
 
-const PlayTable = ({ trick, game, dealCards, claimTrick }) => {
+const PlayTable = ({ trick, game, dealCards, claimTrick, leaveTable }) => {
     const handleClick = (e) => {
         e.preventDefault();
         if (e.target.id === 'startGame') {
@@ -18,6 +19,9 @@ const PlayTable = ({ trick, game, dealCards, claimTrick }) => {
         }
         if (e.target.id === 'claimTrick') {
             claimTrick();
+        }
+        if (e.target.id === 'leaveTable') {
+            leaveTable();
         }
 
         // const tempTrick =[...trick];
@@ -92,10 +96,7 @@ const PlayTable = ({ trick, game, dealCards, claimTrick }) => {
                             )}
                         <div>
 
-                            <button className="btn btn-warning m-3">Leave Table</button>
-
-
-
+                            <button id="leaveTable" className="btn btn-warning m-3" onClick={handleClick}>Leave Table</button>
 
                         </div>
                     </div>
