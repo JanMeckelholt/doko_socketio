@@ -31,7 +31,11 @@ io.on('connection', (socket)=>{
             game = createGame(room);
         };
         game = addPlayerToRoom({ playerId: socket.id, playerName: name, room:room})
-        if(game.error) return callback(game);
+        if (game.error) {
+            console.log("game-error")
+            console.log(game)
+            return callback(game);
+        }
         console.log(game);
         socket.join(game.room);
         io.to(game.room).emit('gameUpdate', game);

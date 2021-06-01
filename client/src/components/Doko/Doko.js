@@ -53,10 +53,10 @@ const Doko = ({ location }) => {
         console.log('name: ' + name, ', room: ' + room)
         setConnected(true);
         socket.emit('join', { name, room }, (game) => {
-            if (game.error) {
-                //location.pathname = "/"
-            }
             setGame(game);
+            if (game.error) {
+                leaveTable()
+            }
         });
 
 
@@ -65,7 +65,7 @@ const Doko = ({ location }) => {
             setConnected(false);
         }
 
-    }, [SERVERENDPOINT, location.search]);
+    }, [SERVERENDPOINT, location.search, location.pathname]);
 
     useEffect(() => {
         socket.on('connect_error', () => {
@@ -152,7 +152,8 @@ const Doko = ({ location }) => {
                 </div>
             ) : (
                 <div>
-                    <h1>Server seems to be down!</h1>
+                    <h1>Error</h1>
+                    <h1>{(game && game.error) ? game.error : "Server seems to be down!"}</h1>
                     <a href="/">Back to Login</a>
                 </div>
             )}
